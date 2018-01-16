@@ -1,10 +1,9 @@
-# Apache Drill dialect for SQLAlchemy.
----
+# Apache Drill dialect for SQLAlchemy
 The primary purpose of this is to have a working dialect for Apache Drill that can be used with Superset 
 
 https://github.com/airbnb/superset
 
-Obviously, a working, robust dialect for Drill serves other purposes as well, but most of the iterative planning for this REPO will be based on working with Caravel. Other changes will gladly be incorporated, as long as it doesn't hurt Superset integration. 
+Obviously, a working, robust dialect for Drill serves other purposes as well, but most of the iterative planning for this REPO will be based on working with Superset. Other changes will gladly be incorporated, as long as it doesn't hurt Superset integration. 
 
 ## Current Status/Development Approach
 Currently we can connect to drill, and issue queries for basic visualizations and get results. We also ennumerate table columns for some times of tables. Here are things that are working as some larger issues to work out. (Individual issues are tracked under issues)
@@ -19,24 +18,60 @@ Currently we can connect to drill, and issue queries for basic visualizations an
 
 So, we are "limping along" and working as is, but contribution and just testing/use to identify issues would be very welcome! 
 
+## Unit tests
+The unit tests include two types:
 
-### Many thanks
-to drillpy and pydrill for code used increating the drilldbapi.py code for connecting!
+- Base: tests the functions of the main standalone class.  
+- Alchemy: tests the package via SQLAlchemy module.  
 
-# NOTE PLEASE READ
+At first, you must install the package:
+```
+python setup.py install
+```
+Then install the package SQLAlchemy:
+```pip install SQLAlchemy```.
+At last, to start the unit tests, type the following command:
+```shell
+HOST=<drillhost> PORT=<drillport> DB=<workspace> FILE=<workspace_file> SSL=<if ssl> USERNAME=<drill username> PASSWORD=<drill password> python -m unittest -v -f test.base test.alchemy
+```
+Example:
+```shell
+HOST=localhost \
+PORT=8047 \
+DB=dfs.drilldbs \
+FILE=region.parquet
+SSL=False \
+USERNAME=your_username \
+PASSWORD=your_password \
+python -m unittest -v -f test.base test.alchemy
+```
+
+## Getting started
+### SQLAlchemy example configuration
+To use Apache Drill dialect for SQLAlchemy:
+```python
+from sqlalchemy import create_engine
+
+# Define the apache drill connection string parameters
+drillurl = 'drill+sadrill://<username>:<password>@<drillhost>:<drillport>/dfs.yourdb?use_ssl=True'
+
+# Create SQLAlchemy drill engine
+engine = create_engine(drillurl, echo=False)
+conn = engine.connect()
+
+rs = self.conn.execute("SELECT * FROM dfs.yourdb LIMIT 10")
+for row in rs:
+    print(row)
+```
+
+### Superset setup
 Much of the this readme is wrong right now. I need to do updates
 Right now all you need to do is python3 setup.py install this on the box you will be runnign super set on then create a URL that looks like this:
 
-drill+sadrill://username:password@drillhost:drillport/dfs/yourdb?use_ssl=True
+To make it works with superset you must add the following string inside the field SQLAlchemy URI on the database section (`/databaseview/add`):
+```
+drill+sadrill://<username>:<password>@<drillhost>:<drillport>/dfs.yourdb?use_ssl=True
+```
 
-I will update more later... sorry for the lack doc updates!
-
-
-
-### Docker 
-Get the superset repo
-
-FROM supersetimage(not sure it's name)
-RUN git clone https://github.com/JohnOmernik/sqlalchemy-drill && cd sqlalchemy-drill && python3 setup.py install 
-CMD["superset"]
-
+### Many thanks
+Many thanks to drillpy and pydrill for code used increating the drilldbapi.py code for connecting!

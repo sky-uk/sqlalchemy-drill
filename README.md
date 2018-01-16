@@ -24,12 +24,11 @@ The unit tests include two types:
 - Base: tests the functions of the main standalone class.  
 - Alchemy: tests the package via SQLAlchemy module.  
 
-At first, you must install the package:
-```
+At first, you must install the package and SQLAlchemy:
+```shell
 python setup.py install
+pip install SQLAlchemy
 ```
-Then install the package SQLAlchemy:
-```pip install SQLAlchemy```.
 At last, to start the unit tests, type the following command:
 ```shell
 HOST=<drillhost> PORT=<drillport> DB=<workspace> FILE=<workspace_file> SSL=<if ssl> USERNAME=<drill username> PASSWORD=<drill password> python -m unittest -v -f test.base test.alchemy

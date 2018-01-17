@@ -51,18 +51,19 @@ class Cursor(object):
 
     @staticmethod
     def substitute_in_query(string_query, parameters):
-        query = string_query
         try:
+            query = string_query
             for param in parameters:
                 if type(param) == str:
                     query = query.replace("?", "'{param}'".format(param=param), 1)
                 else:
                     query = query.replace("?", str(param), 1)
+            return query
         except Exception as ex:
             print("************************************")
             print("Error in Cursor.substitute_in_query", str(ex))
             print("************************************")
-        return query
+            return None
 
     @staticmethod
     def submit_query(query, host, port, proto, session):
@@ -76,9 +77,9 @@ class Cursor(object):
 
     @staticmethod
     def parse_column_types(df):
-        names = []
-        types = []
         try:
+            names = []
+            types = []
             for column in df:
                 names.append(column)
                 try:
@@ -94,11 +95,12 @@ class Cursor(object):
                             types.append("timestamp")
                         except ValueError:
                             types.append("varchar")
+            return names, types
         except Exception as ex:
             print("************************************")
             print("Error in Cursor.parse_column_types", str(ex))
             print("************************************")
-        return names, types
+            return None
 
     @connected
     def getdesc(self):
@@ -151,6 +153,7 @@ class Cursor(object):
                     print("************************************")
                     print("Error in Cursor.execute", str(ex))
                     print("************************************")
+                    return None
 
     @connected
     def fetchone(self):

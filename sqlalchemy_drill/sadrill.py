@@ -110,6 +110,7 @@ class DrillCompiler_sadrill(compiler.SQLCompiler):
                 print("************************************")
                 print("Error in DrillCompiler_sadrill.visit_table :: ", str(ex))
                 print("************************************")
+                return None
         else:
             return ""
 
@@ -142,10 +143,9 @@ class DrillDialect_sadrill(default.DefaultDialect):
         return module
 
     def create_connect_args(self, url, **kwargs):
-        url_port = url.port or 8048
-        qargs = {'host': url.host, 'port': url_port}
-
         try:
+            url_port = url.port or 8048
+            qargs = {'host': url.host, 'port': url_port}
             db_parts = (url.database or 'drill').split('/')
             db = ".".join(db_parts)
 
@@ -163,11 +163,12 @@ class DrillDialect_sadrill(default.DefaultDialect):
                 qargs['drillpass'] = ""
                 if url.password:
                     qargs['drillpass'] = url.password
+            return [], qargs
         except Exception as ex:
             print("************************************")
             print("Error in DrillDialect_sadrill.create_connect_args :: ", str(ex))
             print("************************************")
-        return [], qargs
+            return None
 
     def get_selected_workspace(self):
         return self.workspace
@@ -213,35 +214,35 @@ class DrillDialect_sadrill(default.DefaultDialect):
         return True
 
     def get_schema_names(self, connection, **kw):
-        curs = connection.execute("SHOW SCHEMAS")
-        result = []
         try:
+            curs = connection.execute("SHOW SCHEMAS")
+            result = []
             for row in curs:
                 if row.SCHEMA_NAME != "cp.default" and row.SCHEMA_NAME != "INFORMATION_SCHEMA":
                     result.append(row.SCHEMA_NAME)
+            return tuple(result)
         except Exception as ex:
             print("************************************")
             print("Error in DrillDialect_sadrill.get_schema_names :: ", str(ex))
             print("************************************")
-
-        return tuple(result)
+            return None
 
     def get_table_names(self, connection, schema=None, **kw):
-        curs = connection.execute("SHOW FILES FROM {0}".format(self.db))
-        tables_names = []
         try:
+            curs = connection.execute("SHOW FILES FROM {0}".format(self.db))
+            tables_names = []
             for row in curs:
                 if row.name.find(".view.drill") >= 0:
                     myname = row.name.replace(".view.drill", "")
                 else:
                     myname = row.name
                 tables_names.append(myname)
-
+            return tuple(tables_names)
         except Exception as ex:
             print("************************************")
             print("Error in DrillDialect_sadrill.get_table_names :: ", str(ex))
             print("************************************")
-        return tuple(tables_names)
+            return None
 
     def get_columns(self, connection, table_name, schema=None, **kw):
         result = []

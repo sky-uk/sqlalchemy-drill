@@ -77,30 +77,24 @@ class Cursor(object):
 
     @staticmethod
     def parse_column_types(df):
-        try:
-            names = []
-            types = []
-            for column in df:
-                names.append(column)
+        names = []
+        types = []
+        for column in df:
+            names.append(column)
+            try:
+                df[column] = df[column].astype(int)
+                types.append("bigint")
+            except ValueError:
                 try:
-                    df[column] = df[column].astype(int)
-                    types.append("bigint")
+                    df[column] = df[column].astype(float)
+                    types.append("decimal")
                 except ValueError:
                     try:
-                        df[column] = df[column].astype(float)
-                        types.append("decimal")
+                        df[column] = to_datetime(df[column])
+                        types.append("timestamp")
                     except ValueError:
-                        try:
-                            df[column] = to_datetime(df[column])
-                            types.append("timestamp")
-                        except ValueError:
-                            types.append("varchar")
-            return names, types
-        except Exception as ex:
-            print("************************************")
-            print("Error in Cursor.parse_column_types", str(ex))
-            print("************************************")
-            return None
+                        types.append("varchar")
+        return names, types
 
     @connected
     def getdesc(self):
